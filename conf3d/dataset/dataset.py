@@ -5,6 +5,7 @@ import json
 from tqdm import tqdm
 import pickle
 from rdkit import Chem
+import pandas as pd
 from collections import defaultdict
 
 def preprocess_GEOM_dataset(base_path, dataset_name, conf_per_mol=5, train_size=0.8, tot_mol_size=50000, seed=None):
@@ -221,7 +222,7 @@ def get_GEOM_testset(base_path, dataset_name, block, tot_mol_size=200, seed=None
         for conf_id in conf_ids:
             conf_meta = mol.get('conformers')[conf_id]
             rd_mol = conf_meta.get('rd_mol')
-            data = [smiles, Chem.MolToSmiles(rd_mol), rd_mol.GetNumAtoms(), rd_mol.GetNumBonds(), Chem.MolToMolBlock(rd_mol)]
+            data = [smiles, Chem.MolToSmiles(rd_mol), rd_mol.GetNumAtoms(), rd_mol.GetNumBonds(), Chem.MolToMolBlock(rd_mol), i, conf_id]
             datas.append(data)
 
       
@@ -235,19 +236,28 @@ def get_GEOM_testset(base_path, dataset_name, block, tot_mol_size=200, seed=None
     return all_test_data
 
 
-def add_text(df):
-    text_col = []
-    for _, row in df.iterrows():
-        num_atom = row['num_atom']
-        num_bond = row['num_bond']
-        system_prompt = f'Below is a SMILES of a molecule, generate its 3D structure. The molecule has {num_atom} atoms and {num_bond} bonds.'
-        user_message = row['smiles'] 
-        model_answer = row['mol_block']
-        
-        text = '<s>[INST] <<SYS>>\n' + system_prompt + '\n<</SYS>>\n\n' + user_message + ' [/INST] ' + model_answer + ' </s>'
-        text_col.append(text)
 
-    df.loc[:, 'text'] = text_col
+def process_df(data_list):
+    try:
+        df = pd.DataFrame(data_list, columns=['smiles', 'canonicalize_smiles', 'num_atom', 'num_bond', 'mol_block'])
+        text_col = []
+        for _, row in df.iterrows():
+            num_atom = row['num_atom']
+            num_bond = row['num_bond']
+            system_prompt = f'Below is a SMILES of a molecule, generate its 3D structure. The molecule has {num_atom} atoms and {num_bond} bonds.'
+            user_message = row['canonicalize_smiles'] 
+            model_answer = row['mol_block']
+            
+            text = '<s>[INST] <<SYS>>\n' + system_prompt + '\n<</SYS>>\n\n' + user_message + ' [/INST] ' + model_answer + ' </s>'
+            text_col.append(text)
+
+        df.loc[:, 'text'] = text_col
+    except:
+        df = pd.DataFrame(data_list, columns=['smiles', 'canonicalize_smiles', 'num_atom', 'num_bond', 'mol_block', 'smiles_index', 'conformers_index'])
+    
+    df['num_atom'] = df['num_atom'].astype(int)
+    df['num_bond'] = df['num_bond'].astype(int)
+    
     return df
 
 

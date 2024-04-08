@@ -27,16 +27,10 @@ if __name__ == '__main__':
     os.makedirs(processed_data_path, exist_ok=True)
 
     # save train and val data
-    df = pd.DataFrame(train_data, columns=['smiles', 'canonicalize_smiles', 'num_atom', 'num_bond', 'mol_block'])
-    df['num_atom'] = df['num_atom'].astype(int)
-    df['num_bond'] = df['num_bond'].astype(int)
-    df = dataset.add_text(df)
+    df =dataset.process_df(train_data)
     df.to_csv(os.path.join(processed_data_path, 'train_data_%dk.csv' % ((len(train_data) // args.conf_per_mol) // 1000)),index=False)
 
-    df = pd.DataFrame(val_data, columns=['smiles', 'canonicalize_smiles', 'num_atom', 'num_bond', 'mol_block'])
-    df['num_atom'] = df['num_atom'].astype(int)
-    df['num_bond'] = df['num_bond'].astype(int)
-    df = dataset.add_text(df)
+    df = dataset.process_df(val_data)
     df.to_csv(os.path.join(processed_data_path, 'val_data_%dk.csv' % ((len(val_data) // args.conf_per_mol) // 1000)),index=False)
   
     del test_data
@@ -45,8 +39,5 @@ if __name__ == '__main__':
     test_data = dataset.get_GEOM_testset(rdkit_folder_path, args.dataset_name, block=[train_data, val_data], \
                                          tot_mol_size=args.test_mol_size, seed=2021, \
                                          confmin=args.confmin, confmax=args.confmax)
-    df = pd.DataFrame(test_data, columns=['smiles', 'canonicalize_smiles', 'num_atom', 'num_bond', 'mol_block'])
-    df['num_atom'] = df['num_atom'].astype(int)
-    df['num_bond'] = df['num_bond'].astype(int)
-    df = dataset.add_text(df)
+    df = dataset.process_df(test_data)
     df.to_csv(os.path.join(processed_data_path, 'test_data_%d.csv' % (args.test_mol_size)),index=False)

@@ -1,0 +1,41 @@
+lora:
+  r: 256
+  lora_alpha: 512
+  lora_dropout: 0.01
+  bias: "none"
+  task_type: CAUSAL_LM
+
+training_arguments:
+  output_dir: /hpc2hdd/home/yli106/smiles2mol/results
+  overwrite_output_dir: true
+  num_train_epochs: 10
+  per_device_train_batch_size: 4
+  per_device_eval_batch_size: 2
+  gradient_accumulation_steps: 32
+  optim: paged_adamw_32bit
+  evaluation_strategy: epoch
+  save_steps: 200
+  logging_steps: 50
+  eval_steps: 1
+  learning_rate: 5e-5
+  weight_decay: 0.001
+  fp16: false
+  bf16: true
+  max_grad_norm: 0.3
+  max_steps: -1
+  warmup_ratio: 0.01
+  group_by_length: true
+  lr_scheduler_type: linear
+
+data:
+  base_path: /hpc2hdd/home/yli106/smiles2mol/GEOM
+  dataset: qm9
+  train_set: train_demo.csv
+  val_set: val_data_demo.csv
+  test_set: test_data_200.csv
+
+model:
+  base_path: /hpc2hdd/home/yli106/smiles2mol/models
+  type: llama2
+  size: 7b
+  save_path: /hpc2hdd/home/yli106/smiles2mol/models/finetuned
