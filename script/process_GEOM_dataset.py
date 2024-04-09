@@ -1,6 +1,7 @@
 import os
 import argparse
 import pandas as pd
+import pickle
 import sys
 sys.path.append('/hpc2hdd/home/yli106/smiles2mol')
 from conf3d import dataset
@@ -29,15 +30,17 @@ if __name__ == '__main__':
     # save train and val data
     df =dataset.process_df(train_data)
     df.to_csv(os.path.join(processed_data_path, 'train_data_%dk.csv' % ((len(train_data) // args.conf_per_mol) // 1000)),index=False)
+    print('save train %dk done' % ((len(train_data) // args.conf_per_mol) // 1000))
 
     df = dataset.process_df(val_data)
     df.to_csv(os.path.join(processed_data_path, 'val_data_%dk.csv' % ((len(val_data) // args.conf_per_mol) // 1000)),index=False)
-  
+    print('save val %dk done' % ((len(val_data) // args.conf_per_mol) // 1000))
     del test_data
 
     # filter test data
     test_data = dataset.get_GEOM_testset(rdkit_folder_path, args.dataset_name, block=[train_data, val_data], \
                                          tot_mol_size=args.test_mol_size, seed=2021, \
                                          confmin=args.confmin, confmax=args.confmax)
-    df = dataset.process_df(test_data)
-    df.to_csv(os.path.join(processed_data_path, 'test_data_%d.csv' % (args.test_mol_size)),index=False)
+    with open(os.path.join(processed_data_path, 'test_data_%d.pkl' % (args.test_mol_size)), "wb") as fout:
+        pickle.dump(test_data, fout)
+    print('save test %d done' % (args.test_mol_size))

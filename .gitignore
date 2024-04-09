@@ -1,2 +1,4 @@
 GEOM/
 models/
+wandb/
+results/

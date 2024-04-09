@@ -217,16 +217,18 @@ def get_GEOM_testset(base_path, dataset_name, block, tot_mol_size=200, seed=None
 
         datas = []
         smiles = mol.get('smiles')
-
+        no_canonicalize_smiles = True
         conf_ids = np.arange(mol.get('uniqueconfs'))
         for conf_id in conf_ids:
             conf_meta = mol.get('conformers')[conf_id]
             rd_mol = conf_meta.get('rd_mol')
-            data = [smiles, Chem.MolToSmiles(rd_mol), rd_mol.GetNumAtoms(), rd_mol.GetNumBonds(), Chem.MolToMolBlock(rd_mol), i, conf_id]
-            datas.append(data)
-
+            if no_canonicalize_smiles:
+                canonicalize_smiles = Chem.MolToSmiles(rd_mol)
+                no_canonicalize_smiles = False
+            datas.append(rd_mol)
+        data_list = [canonicalize_smiles, datas]
       
-        all_test_data.extend(datas)
+        all_test_data.append(data_list)
         num_valid_mol += 1
         num_valid_conf += len(datas)
 

@@ -14,8 +14,11 @@ from peft import LoraConfig, PeftModel
 from trl import SFTTrainer
 import argparse
 from easydict import EasyDict
+import yaml
 
 # python -u /hpc2hdd/home/yli106/smiles2mol/script/train.py --config_path /hpc2hdd/home/yli106/smiles2mol/config/qm9_default.yml
+# python -u /hpc2hdd/home/yli106/smiles2mol/script/train.py --config_path /hpc2hdd/home/yli106/smiles2mol/config/qm9_test.yml
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--config_path', type=str, help='path of config', required=True)
@@ -24,7 +27,8 @@ if __name__ == '__main__':
     with open(args.config_path, 'r') as f:
         config = yaml.safe_load(f)
     config = EasyDict(config)
-    
+    config.training_arguments.learning_rate = float(config.training_arguments.learning_rate)
+
     # load the dataset
     load_path = os.path.join(config.data.base_path, '%s_processed' % config.data.dataset)
     print('loading data from %s' % load_path)
@@ -36,7 +40,7 @@ if __name__ == '__main__':
 
     # load the tokenizer
     model_path = os.path.join(config.model.base_path, '%s_%s' % (config.model.type, config.model.size))
-    tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True, use_fast=True)
+    tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True, use_fast=False)
     tokenizer.pad_token = tokenizer.eos_token # Use the EOS token to pad shorter sequences
     tokenizer.padding_side = "right" # Fix weird overflow issue with fp16 training
 
@@ -70,5 +74,5 @@ if __name__ == '__main__':
     trainer.train()
 
     # Save trained model
-    new_model_path = os.path.join(config.model.save_path, '%s_%s_%s_demo' % (config.model.type, config.model.size, config.training_arguments.num_train_epochs))
+    new_model_path = os.path.join(config.model.save_path, '%s_%s_%s' % (config.model.type, config.model.size, config.training_arguments.num_train_epochs))
     trainer.model.save_pretrained(new_model_path)
