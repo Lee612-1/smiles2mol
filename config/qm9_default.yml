@@ -31,10 +31,19 @@ data:
   dataset: qm9
   train_set: train_data_40k.csv
   val_set: val_data_5k.csv
-  test_set: test_data_200.csv
+  test_set: test_data_200.pkl
 
 model:
   base_path: /hpc2hdd/home/yli106/smiles_3d
   type: llama2
   size: 13b
   save_path: /hpc2hdd/home/yli106/smiles2mol/models/finetuned
+
+inference:
+  max_length: 3000
+  multiplier: 2
+  do_sample: true
+  top_k: 10
+  top_p: 0.9
+  temperature: 0.1
+  save_path: /hpc2hdd/home/yli106/smiles2mol/GEOM/generated

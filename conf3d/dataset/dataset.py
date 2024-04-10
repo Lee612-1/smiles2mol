@@ -1,6 +1,7 @@
 import numpy as np
 import random
 import os
+import copy
 import json
 from tqdm import tqdm
 import pickle
@@ -224,9 +225,11 @@ def get_GEOM_testset(base_path, dataset_name, block, tot_mol_size=200, seed=None
             rd_mol = conf_meta.get('rd_mol')
             if no_canonicalize_smiles:
                 canonicalize_smiles = Chem.MolToSmiles(rd_mol)
+                num_atom = rd_mol.GetNumAtoms()
+                num_bond = rd_mol.GetNumBonds()
                 no_canonicalize_smiles = False
             datas.append(rd_mol)
-        data_list = [canonicalize_smiles, datas]
+        data_list = [canonicalize_smiles, num_atom, num_bond, datas]
       
         all_test_data.append(data_list)
         num_valid_mol += 1
@@ -234,9 +237,21 @@ def get_GEOM_testset(base_path, dataset_name, block, tot_mol_size=200, seed=None
 
     print('poster-filter: find %d molecules with %d confs' % (num_valid_mol, num_valid_conf))
 
-
     return all_test_data
 
+
+def process_inst(smiles, num_atom, num_bond):
+    system_prompt = f'Below is a SMILES of a molecule, generate its 3D structure. The molecule has {num_atom} atoms and {num_bond} bonds.'
+    inst = '<s>[INST] <<SYS>>\n' + system_prompt + '\n<</SYS>>\n\n' + smiles + ' [/INST] '
+    
+    return inst
+
+
+def get_mol_block(text, smiles, num_atom, num_bond):
+    inst = dataset.process_inst(smiles, num_atom, num_bond).replace('<s>', '')
+    mol_block = text.replace(inst, '').replace(' </s>','').replace('<s>', '')
+    
+    return mol_block
 
 
 def process_df(data_list):
@@ -246,11 +261,10 @@ def process_df(data_list):
         for _, row in df.iterrows():
             num_atom = row['num_atom']
             num_bond = row['num_bond']
-            system_prompt = f'Below is a SMILES of a molecule, generate its 3D structure. The molecule has {num_atom} atoms and {num_bond} bonds.'
-            user_message = row['canonicalize_smiles'] 
+            smiles = row['canonicalize_smiles'] 
+            inst = process_inst(smiles, num_atom, num_bond)
             model_answer = row['mol_block']
-            
-            text = '<s>[INST] <<SYS>>\n' + system_prompt + '\n<</SYS>>\n\n' + user_message + ' [/INST] ' + model_answer + ' </s>'
+            text = inst + model_answer + ' </s>'
             text_col.append(text)
 
         df.loc[:, 'text'] = text_col
@@ -261,6 +275,15 @@ def process_df(data_list):
     df['num_bond'] = df['num_bond'].astype(int)
     
     return df
+
+
+def process_generated_data(data):
+    data_c = copy.deepcopy(data)
+    for i in range(len(data_c)):
+        for j in range(len(data_c[i][4])):
+            data_c[i][4][j] = get_mol_block(data_c[i][4][j], data_c[i][0], data_c[i][1], data_c[i][2])
+
+    return data_c
 
 
 if __name__ == '__main__':
