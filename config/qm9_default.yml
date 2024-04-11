@@ -1,17 +1,26 @@
-lora:
+lora_config:
+  lora: true
   r: 256
   lora_alpha: 512
   lora_dropout: 0.01
   bias: "none"
   task_type: CAUSAL_LM
 
+bnb_config:
+  bnb: false
+  load_in_4bit: true
+  bnb_4bit_quant_type: nf4
+  bnb_4bit_compute_dtype: float32
+  bnb_4bit_use_double_quant: true
+
 training_arguments:
   output_dir: /hpc2hdd/home/yli106/smiles2mol/results
+  overwrite_output_dir: true
   num_train_epochs: 10
   per_device_train_batch_size: 2
   per_device_eval_batch_size: 2
   gradient_accumulation_steps: 64
-  optim: paged_adamw_32bit
+  optim: adamw_torch
   evaluation_strategy: epoch
   save_steps: 200
   logging_steps: 100

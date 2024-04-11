@@ -5,6 +5,7 @@ from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
     HfArgumentParser,
+    BitsAndBytesConfig,
     TrainingArguments,
     logging,
 )
@@ -42,6 +43,8 @@ if __name__ == '__main__':
     tokenizer.pad_token = tokenizer.eos_token # Use the EOS token to pad shorter sequences
     tokenizer.padding_side = "right" # Fix weird overflow issue with fp16 training
 
+    if config.bnb_config.bnb:
+        bnb_config = BitsAndBytesConfig(**config.bnb_config)
 
     model = AutoModelForCausalLM.from_pretrained(
         model_path,
@@ -50,23 +53,36 @@ if __name__ == '__main__':
     model.config.use_cache = False
     model.config.pretraining_tp = 1
 
-    # lora model setup
-    peft_config = LoraConfig(**config.lora)
     # Set training parameters
     training_arguments = TrainingArguments(**config.training_arguments)
 
-    # Set supervised fine-tuning parameters
-    trainer = SFTTrainer(
-        model=model,
-        train_dataset=train_dataset,
-        eval_dataset=test_dataset,
-        peft_config=peft_config,
-        dataset_text_field="text",
-        max_seq_length=2000,
-        tokenizer=tokenizer,
-        args=training_arguments,
-        packing=False
-    )
+    # lora model setup
+    if config.lora_config.lora:
+        peft_config = LoraConfig(**config.lora_config)
+
+        # Set supervised fine-tuning parameters
+        trainer = SFTTrainer(
+            model=model,
+            train_dataset=train_dataset,
+            eval_dataset=test_dataset,
+            peft_config=peft_config,
+            dataset_text_field="text",
+            max_seq_length=2000,
+            tokenizer=tokenizer,
+            args=training_arguments,
+            packing=False
+        )
+    else:
+        trainer = SFTTrainer(
+            model=model,
+            train_dataset=train_dataset,
+            eval_dataset=test_dataset,
+            dataset_text_field="text",
+            max_seq_length=2000,
+            tokenizer=tokenizer,
+            args=training_arguments,
+            packing=False
+        )
 
     # Train model
     trainer.train()
