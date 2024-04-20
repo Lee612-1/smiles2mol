@@ -248,7 +248,7 @@ def process_inst(smiles, num_atom, num_bond):
 
 
 def get_mol_block(text, smiles, num_atom, num_bond):
-    inst = dataset.process_inst(smiles, num_atom, num_bond).replace('<s>', '')
+    inst = process_inst(smiles, num_atom, num_bond).replace('<s>', '')
     mol_block = text.replace(inst, '').replace(' </s>','').replace('<s>', '')
     
     return mol_block

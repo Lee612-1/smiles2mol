@@ -2,3 +2,7 @@ GEOM/
 models/
 wandb/
 results/
+results2/
+results_13b/
+results2_resume/
+results_llama3/

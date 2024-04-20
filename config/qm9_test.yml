@@ -1,5 +1,8 @@
+finetune:
+  lora: true
+  bnb: false
+
 lora_config:
-  lora: false
   r: 256
   lora_alpha: 512
   lora_dropout: 0.01
@@ -7,16 +10,16 @@ lora_config:
   task_type: CAUSAL_LM
 
 bnb_config:
-  bnb: false
   load_in_4bit: true
   bnb_4bit_quant_type: nf4
   bnb_4bit_compute_dtype: float32
   bnb_4bit_use_double_quant: true
 
 training_arguments:
-  output_dir: /hpc2hdd/home/yli106/smiles2mol/results
+  output_dir: /hpc2hdd/home/yli106/smiles2mol/results3
   num_train_epochs: 20
-  per_device_train_batch_size: 4
+  optim: adamw_torch
+  per_device_train_batch_size: 2
   per_device_eval_batch_size: 2
   gradient_accumulation_steps: 64
   save_steps: 1000
@@ -30,6 +33,8 @@ training_arguments:
   warmup_ratio: 0.01
   group_by_length: true
   lr_scheduler_type: linear
+  evaluation_strategy: epoch
+  eval_steps: 1
 
 data:
   base_path: /hpc2hdd/home/yli106/smiles2mol/GEOM
@@ -40,6 +45,6 @@ data:
 
 model:
   base_path: /hpc2hdd/home/yli106/smiles_3d
-  type: llama2
-  size: 13b
+  type: mistral
+  size: 7b
   save_path: /hpc2hdd/home/yli106/smiles2mol/models/finetuned

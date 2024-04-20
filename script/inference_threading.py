@@ -163,5 +163,5 @@ if __name__ == '__main__':
  
                 
     # save as file
-    with open(os.path.join(config.inference.save_path,'inference_%s.pkl' % config.model.size), 'wb') as file:
-        pickle.dump(all_results, file)
+    with open(os.path.join(config.inference.save_path,'inference_%s_%s.pkl' % (config.model.type, config.model.size)), 'wb') as file:
+        pickle.dump(test_data, file)

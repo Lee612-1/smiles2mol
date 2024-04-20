@@ -43,7 +43,7 @@ if __name__ == '__main__':
     tokenizer.pad_token = tokenizer.eos_token # Use the EOS token to pad shorter sequences
     tokenizer.padding_side = "right" # Fix weird overflow issue with fp16 training
 
-    if config.bnb_config.bnb:
+    if config.finetune.bnb:
         bnb_config = BitsAndBytesConfig(**config.bnb_config)
 
     model = AutoModelForCausalLM.from_pretrained(
@@ -57,8 +57,19 @@ if __name__ == '__main__':
     training_arguments = TrainingArguments(**config.training_arguments)
 
     # lora model setup
-    if config.lora_config.lora:
-        peft_config = LoraConfig(**config.lora_config)
+    if config.finetune.lora:
+        peft_config = LoraConfig(**config.lora_config,
+            target_modules=[
+            "q_proj",
+            "v_proj",
+            "k_proj",
+            "o_proj",
+            "gate_proj",
+            "up_proj",
+            "down_proj",
+            # "lm_head"
+            ]
+        )
 
         # Set supervised fine-tuning parameters
         trainer = SFTTrainer(
@@ -67,7 +78,7 @@ if __name__ == '__main__':
             eval_dataset=test_dataset,
             peft_config=peft_config,
             dataset_text_field="text",
-            max_seq_length=2000,
+            max_seq_length=2100,
             tokenizer=tokenizer,
             args=training_arguments,
             packing=False
@@ -78,7 +89,7 @@ if __name__ == '__main__':
             train_dataset=train_dataset,
             eval_dataset=test_dataset,
             dataset_text_field="text",
-            max_seq_length=2000,
+            max_seq_length=2100,
             tokenizer=tokenizer,
             args=training_arguments,
             packing=False

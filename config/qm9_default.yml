@@ -1,5 +1,8 @@
-lora_config:
+finetune:
   lora: true
+  bnb: false
+
+lora_config:
   r: 256
   lora_alpha: 512
   lora_dropout: 0.01
@@ -7,14 +10,13 @@ lora_config:
   task_type: CAUSAL_LM
 
 bnb_config:
-  bnb: false
   load_in_4bit: true
   bnb_4bit_quant_type: nf4
   bnb_4bit_compute_dtype: float32
   bnb_4bit_use_double_quant: true
 
 training_arguments:
-  output_dir: /hpc2hdd/home/yli106/smiles2mol/results
+  output_dir: /hpc2hdd/home/yli106/smiles2mol/results_llama3
   overwrite_output_dir: true
   num_train_epochs: 10
   per_device_train_batch_size: 2
@@ -25,7 +27,7 @@ training_arguments:
   save_steps: 200
   logging_steps: 100
   eval_steps: 1
-  learning_rate: 5e-4
+  learning_rate: 1e-5
   weight_decay: 0.001
   fp16: false
   bf16: true
@@ -45,8 +47,9 @@ data:
 model:
   base_path: /hpc2hdd/home/yli106/smiles_3d
   type: llama2
-  size: 13b
+  size: 7b_chat
   save_path: /hpc2hdd/home/yli106/smiles2mol/models/finetuned
+  peft_path: /hpc2hdd/home/yli106/smiles2mol/results/checkpoint-9400
 
 inference:
   max_length: 3000
@@ -54,5 +57,5 @@ inference:
   do_sample: true
   top_k: 10
   top_p: 0.9
-  temperature: 0.1
+  temperature: 0.5
   save_path: /hpc2hdd/home/yli106/smiles2mol/GEOM/generated
