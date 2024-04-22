@@ -6,82 +6,36 @@ from rdkit.Chem.rdmolops import RemoveHs
 from rdkit.Chem import rdMolAlign as MA
 from rdkit.Chem.rdForceFieldHelpers import MMFFOptimizeMolecule
 
-from conf3d import dataset
+from conf3d import dataset, utils
 
-
-######  要修改
-def validate(text, smiles):
-    lines = text.split('\n')
-    mol = Chem.MolFromSmiles(smiles)
-    mol = Chem.AddHs(mol)
-    num_atoms = int(lines[0])
-    if lines[1] != '' or lines[num_atoms+1] == ' ' or lines[num_atoms+2] !='':
-        return False
-    
-    atoms = []
-    for line in lines[2:num_atoms+2]:
+def filter_gen_list(gen_list, ref_list):
+    filtered_list = []
+    for gen_mol in gen_list:
         try:
-            atom, x, y, z = line.split()
-            atoms.append(atom)
-            x, y, z = float(x), float(y), float(z)
+            rmsd = utils.GetBestRMSD(gen_mol, ref_list[0])
+            filtered_list.append(gen_mol)
         except:
-            return False
+            pass
+    return filtered_list
 
-    rd_atoms = []
-    for i in range(num_atoms):
-        atom = mol.GetAtomWithIdx(i)
-        atom_symbol = atom.GetSymbol()
-        rd_atoms.append(atom_symbol)
+
+def get_cov_mat(gen_list, ref_list, threshold=0.5):
+    if gen_list==[] or ref_list==[]:
+        return None, None
+    cov_count = 0
+    mat_sum = 0
+    for ref_mol in ref_list:
+        rmsd_list = []
+        for gen_mol in gen_list:
+            rmsd = utils.GetBestRMSD(gen_mol, ref_mol)
+            rmsd_list.append(rmsd)
+        if min(rmsd_list)<=threshold:
+            cov_count+=1
+        mat_sum+=min(rmsd_list)
+        
+    return 100*cov_count/len(ref_list), mat_sum/len(ref_list)
+
+def get_cov_mat_p(gen_list, ref_list, threshold=0.5):
+    cov_p, mat_p = get_cov_mat(ref_list, gen_list, threshold)
+    return cov_p, mat_p
     
-    if set(atoms) != set(rd_atoms):
-        return False
-
-    return True
-
-
-def calc_rmsd(generated_text, text, smiles):
-    with open('ref.xyz', 'w') as file:
-            file.write(text)
-    with open('gen.xyz', 'w') as file:
-            file.write(generated_text)
-    try:
-        raw_ref_mol=Chem.MolFromXYZFile('ref.xyz')
-        raw_gen_mol=Chem.MolFromXYZFile('gen.xyz')
-        ref_mol = Chem.Mol(raw_ref_mol)
-        gen_mol = Chem.Mol(raw_gen_mol)
-    except:
-        return None
-    try:
-        rdDetermineBonds.DetermineBonds(gen_mol)
-    except Exception as e:
-        # print('generated molecule is invalid:', e)
-        return None
-    MMFFOptimizeMolecule(gen_mol)
-    try:
-        rdDetermineBonds.DetermineBonds(ref_mol)
-    except Exception as e:
-        # print('refer molecule is invalid:', e)
-        return None 
-    gen_mol = RemoveHs(gen_mol)
-    ref_mol = RemoveHs(ref_mol) 
-    try:
-        rmsd = MA.GetBestRMS(gen_mol, ref_mol)
-    except Exception as e:
-        # print('generated molecule is invalid:', e)
-        return None
-    # if Chem.MolToSmiles(ref_mol) != smiles:
-    #     return None
-    return rmsd
-
-
-def get_atom_order(text):  
-    lines = text.split('\n')
-    num_atoms = int(lines[0])
-    atoms = []
-    try:
-        for line in lines[2:num_atoms+2]:
-            atom = line.split()[0]
-            atoms.append(atom)
-        return atoms
-    except:
-        return []

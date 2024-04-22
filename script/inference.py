@@ -21,6 +21,9 @@ from conf3d import dataset
 import yaml
 from easydict import EasyDict
 from torch.cuda import empty_cache
+from rdkit import Chem
+from rdkit.Chem.rdmolops import RemoveHs
+from rdkit import RDLogger
 
 # python -u /hpc2hdd/home/yli106/smiles2mol/script/inference.py --config_path /hpc2hdd/home/yli106/smiles2mol/config/qm9_default.yml
 if __name__ == '__main__':
@@ -74,9 +77,14 @@ if __name__ == '__main__':
                 else:
                     return False
 
-        generated_texts = []
+        logger = RDLogger.logger()
+        logger.setLevel(RDLogger.CRITICAL)
+        generated_mol = []
+        remain = config.inference.multiplier*num_conf
         batch_size= 5
-        for _ in range((config.inference.multiplier*num_conf) // batch_size):
+        total_generate = 0
+        all_fail = []
+        while True:
             output_sequences = model.generate(
                 input_ids=input_ids, 
                 max_length=config.inference.max_length, 
@@ -88,28 +96,37 @@ if __name__ == '__main__':
                 stopping_criteria=[CustomStoppingCriteria()], 
                 num_return_sequences=batch_size
             )
-            generated_texts += [tokenizer.decode(sequence, skip_special_tokens=True) for sequence in output_sequences]
+            raw_generated_texts = [tokenizer.decode(sequence, skip_special_tokens=True) for sequence in output_sequences]
+            total_generate+=batch_size
+            fail = 0
+            for j in range(batch_size):
+                mol_block_text = dataset.get_mol_block(raw_generated_texts[j], test_data[i][0], test_data[i][1], test_data[i][2])
+                
+                with open('test.mol', 'w') as f:
+                    f.write(mol_block_text)
+                try:
+                    gen_mol = Chem.MolFromMolFile('test.mol')
+                    gen_mol = RemoveHs(gen_mol)
+                    generated_mol.append(gen_mol)
+                except:
+                    fail+=1
             empty_cache()  # Clear graphics memory cache
+            if fail==batch_size:
+                all_fail.append(1)
+            else:
+                all_fail.append(0)
+            last_ten = all_fail[-10:]
+            if sum(last_ten) == 10:
+                print('timeout')
+                break
+            remain = remain - batch_size + fail
+            if remain<=0:
+                break
 
-        # If num_conf is not an integer multiple of batch_size, process the remaining sequence
-        remainder = (config.inference.multiplier*num_conf) // batch_size
-        if remainder > 0:
-            output_sequences = model.generate(
-                input_ids=input_ids, 
-                max_length=config.inference.max_length, 
-                do_sample=config.inference.do_sample, 
-                top_k=config.inference.top_k, 
-                top_p=config.inference.top_p, 
-                temperature=config.inference.temperature, 
-                eos_token_id=tokenizer.eos_token_id, 
-                stopping_criteria=[CustomStoppingCriteria()], 
-                num_return_sequences=remainder
-            )
-            generated_texts += [tokenizer.decode(sequence, skip_special_tokens=True) for sequence in output_sequences]
-        # generated_text = generated_text.replace(input_text+' ', '')
-        test_data[i].append(generated_texts)
+        print(f'valid:{100*len(generated_mol)/total_generate}%')
+        test_data[i].append(generated_mol)
 
         
-    # save as file
-    with open(os.path.join(config.inference.save_path,'inference_%s_%s.pkl' % (config.model.type, config.model.size)), 'wb') as file:
-        pickle.dump(test_data, file)
+        # save as file
+        with open(os.path.join(config.inference.save_path,'inference_%s_%s.pkl' % (config.model.type, config.model.size)), 'wb') as file:
+            pickle.dump(test_data, file)
