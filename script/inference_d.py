@@ -65,10 +65,10 @@ if __name__ == '__main__':
         atom_list = utils.get_atom(test_data[i][3][0])
 
         num_conf = len(test_data[i][3])
-        print(num_conf)
+        # print(num_conf)
         input_text = dataset.process_inst(test_data[i][0], test_data[i][1], test_data[i][2])
         input_text += ('\n').join(atom_list[:4])
-        print(input_text)
+        # print(input_text)
 
         time = config.inference.multiplier*num_conf
         gen = 0
