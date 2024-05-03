@@ -1,6 +1,8 @@
 import argparse
 import pickle
 import statistics
+import sys
+sys.path.append('/hpc2hdd/home/yli106/smiles2mol')
 from conf3d import utils, dataset
 from tqdm import tqdm
 
@@ -13,21 +15,21 @@ if __name__ == '__main__':
 
     with open(args.input, 'rb') as f:
         generated_data = pickle.load(f)
-
+    generated_data = generated_data[:6]
     cov_list, mat_list,cov_p_list, mat_p_list = [], [], [], []
     for i in tqdm(range(len(generated_data))):
-        gen_list = utils.filter_gen_list(generated_data[i][4])
         ref_list = generated_data[i][3]
+        gen_list = utils.filter_gen_list(generated_data[i][4],ref_list)
         cov, mat = utils.get_cov_mat(gen_list, ref_list, threshold=args.threshold)
-        cov_p, mat_p = utils.get_cov_mat_p(gen_list, ref_list, threshold=args.threshold)
         cov_list.append(cov)
-        mat_list.appen(mat)
+        mat_list.append(mat)
+        cov_p, mat_p = utils.get_cov_mat_p(gen_list, ref_list, threshold=args.threshold)
         cov_p_list.append(cov_p)
         mat_p_list.append(mat_p)
     
     cov_list = list(filter(lambda x: x is not None, cov_list))
-    cov_p_list = list(filter(lambda x: x is not None, cov_p_list))
     mat_list = list(filter(lambda x: x is not None, mat_list))
+    cov_p_list = list(filter(lambda x: x is not None, cov_p_list))
     mat_p_list = list(filter(lambda x: x is not None, mat_p_list))
     
     print('Coverage Mean: %.4f | Coverage Median: %.4f | Match Mean: %.4f | Match Median: %.4f\n' \

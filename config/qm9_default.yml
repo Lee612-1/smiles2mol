@@ -52,7 +52,7 @@ model:
   peft_path: /hpc2hdd/home/yli106/smiles2mol/results/checkpoint-9400
 
 inference:
-  max_length: 3000
+  max_length: 3500
   multiplier: 2
   do_sample: true
   top_k: 10
