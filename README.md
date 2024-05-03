@@ -1,4 +1,4 @@
-![ConfGF](assets/logo.png)
+![smiles2mol](assets/title.png)
 
 ----------------------------
 
