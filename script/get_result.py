@@ -1,25 +1,40 @@
 import argparse
+import os
+import glob
 import pickle
 import statistics
 import sys
 sys.path.append('/hpc2hdd/home/yli106/smiles2mol')
 from conf3d import utils, dataset
 from tqdm import tqdm
+from rdkit import RDLogger
 
-# python -u /hpc2hdd/home/yli106/smiles2mol/script/get_result.py --input /hpc2hdd/home/yli106/smiles2mol/GEOM/generated/inference_llama2_7b_chat.pkl --threshold 0.5  
+# python -u /hpc2hdd/home/yli106/smiles2mol/script/get_result.py --input /hpc2hdd/home/yli106/smiles2mol/GEOM/generated --threshold 0.5  
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--input', type=str)
     parser.add_argument('--threshold', type=float, default=0.5, help='threshold of COV score')
     args = parser.parse_args()
 
-    with open(args.input, 'rb') as f:
-        generated_data = pickle.load(f)
-    generated_data = generated_data[:6]
+    generated_data = []
+    file_list = glob.glob(os.path.join(args.input, 'inference_mistral_7b_*.pkl'))
+    for file in file_list:
+        with open(file, 'rb') as f:
+            generated_data_p = pickle.load(f)
+        generated_data.extend(generated_data_p)
+    test_generated_data = []
+    for i in range(len(generated_data)):
+        try:
+            test_generated_data.append(generated_data[i][4])
+        except:
+            pass
+    print(len(test_generated_data))
     cov_list, mat_list,cov_p_list, mat_p_list = [], [], [], []
-    for i in tqdm(range(len(generated_data))):
+    logger = RDLogger.logger()
+    logger.setLevel(RDLogger.CRITICAL)
+    for i in tqdm(range(len(test_generated_data))):
         ref_list = generated_data[i][3]
-        gen_list = utils.filter_gen_list(generated_data[i][4],ref_list)
+        gen_list = utils.filter_gen_list(test_generated_data[i],ref_list)
         cov, mat = utils.get_cov_mat(gen_list, ref_list, threshold=args.threshold)
         cov_list.append(cov)
         mat_list.append(mat)

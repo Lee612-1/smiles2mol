@@ -46,13 +46,13 @@ data:
 
 model:
   base_path: /hpc2hdd/home/yli106/smiles_3d
-  type: llama2
-  size: 7b_chat
+  type: llama3
+  size: 8b
   save_path: /hpc2hdd/home/yli106/smiles2mol/models/finetuned
-  peft_path: /hpc2hdd/home/yli106/smiles2mol/results/checkpoint-9400
-
+  peft_path: /hpc2hdd/home/yli106/smiles2mol/results_llama3/checkpoint-7800
 inference:
-  max_length: 3500
+  max_length: 4000
+  max_new_tokens: 100
   multiplier: 2
   do_sample: true
   top_k: 10

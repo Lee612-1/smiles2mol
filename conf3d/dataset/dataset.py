@@ -246,6 +246,11 @@ def process_inst(smiles, num_atom, num_bond):
     
     return inst
 
+def process_inst_llama3(smiles, num_atom, num_bond):
+    system_prompt = f'Below is a SMILES of a molecule, generate its 3D structure. The molecule has {num_atom} atoms and {num_bond} bonds.'
+    inst = '<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n' + system_prompt + '<|eot_id|><|start_header_id|>user<|end_header_id|>\n' + smiles + '<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n'
+    
+    return inst
 
 def get_mol_block(text, smiles, num_atom, num_bond):
     inst = process_inst(smiles, num_atom, num_bond).replace('<s>', '')
@@ -254,6 +259,12 @@ def get_mol_block(text, smiles, num_atom, num_bond):
     
     return mol_block_text
 
+def get_mol_block_llama3(text, smiles, num_atom, num_bond):
+    inst = process_inst_llama3(smiles, num_atom, num_bond).replace('<|begin_of_text|>', '')
+    mol_block = text.replace(inst, '').replace('<|end_of_text|>','').replace('<|begin_of_text|>', '')
+    mol_block_text = mol_block.split('END')[0]+'END'
+    
+    return mol_block_text
 
 def process_df(data_list):
     try:

@@ -24,7 +24,7 @@ def filter_gen_list(gen_list, ref_list):
     return filtered_list
 
 
-def get_cov_mat(gen_list, ref_list, threshold=0.5):
+def get_cov_mat(gen_list, ref_list, threshold=0.5, useFF=False):
     if gen_list==[] or ref_list==[]:
         return None, None
     cov_count = 0
@@ -32,6 +32,11 @@ def get_cov_mat(gen_list, ref_list, threshold=0.5):
     for ref_mol in ref_list:
         rmsd_list = []
         for gen_mol in gen_list:
+            if useFF == True:
+                try:
+                    MMFFOptimizeMolecule(gen_mol)
+                except:
+                    pass
             rmsd = GetBestRMSD(gen_mol, ref_mol)
             rmsd_list.append(rmsd)
         if min(rmsd_list)<=threshold:
@@ -40,12 +45,17 @@ def get_cov_mat(gen_list, ref_list, threshold=0.5):
         
     return 100*cov_count/len(ref_list), mat_sum/len(ref_list)
 
-def get_cov_mat_p(gen_list, ref_list, threshold=0.5):
+def get_cov_mat_p(gen_list, ref_list, threshold=0.5, useFF=False):
     if gen_list==[] or ref_list==[]:
         return None, None
     cov_count = 0
     mat_sum = 0
     for gen_mol in gen_list:
+        if useFF == True:
+            try:
+                MMFFOptimizeMolecule(gen_mol)
+            except:
+                pass
         rmsd_list = []
         for ref_mol in ref_list:        
             rmsd = GetBestRMSD(gen_mol, ref_mol)
