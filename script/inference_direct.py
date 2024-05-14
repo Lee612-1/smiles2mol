@@ -25,10 +25,12 @@ from rdkit import Chem
 from rdkit.Chem.rdmolops import RemoveHs
 from rdkit import RDLogger
 
-# python -u /hpc2hdd/home/yli106/smiles2mol/script/inference.py --config_path /hpc2hdd/home/yli106/smiles2mol/config/qm9_default.yml
+# python -u /hpc2hdd/home/yli106/smiles2mol/script/inference_direct.py --config_path /hpc2hdd/home/yli106/smiles2mol/config/qm9_default.yml --start 1 --end 50
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--config_path', type=str, help='path of config', required=True)
+    parser.add_argument('--start', type=int, default=1, help='start idx of test generation')
+    parser.add_argument('--end', type=int, default=200, help='end idx of test generation')
     args = parser.parse_args()
 
     with open(args.config_path, 'r') as f:
@@ -36,7 +38,7 @@ if __name__ == '__main__':
     config = EasyDict(config)
     config.training_arguments.learning_rate = float(config.training_arguments.learning_rate)
     
-    
+
     # load the tokenizer
     model_path = os.path.join(config.model.base_path, '%s_%s' % (config.model.type, config.model.size))
     peft_path = config.model.peft_path #os.path.join(config.model.save_path, '%s_%s_%s' % (config.model.type, config.model.size, config.training_arguments.num_train_epochs))
@@ -56,8 +58,10 @@ if __name__ == '__main__':
     load_path = os.path.join(config.data.base_path, '%s_processed' % config.data.dataset)
     print('loading data from %s' % load_path)
     with open(os.path.join(load_path, config.data.test_set), 'rb') as f:
-        test_data = pickle.load(f)
-     
+        raw_test_data = pickle.load(f)
+    test_data = raw_test_data[args.start-1:args.end]
+    print(f'generate {args.start} to {args.end}')   
+
     for i in tqdm(range(len(test_data))):
         # encode input text
         num_conf = len(test_data[i][3])
@@ -120,6 +124,7 @@ if __name__ == '__main__':
                 print('timeout')
                 break
             remain = remain - batch_size + fail
+            print(remain)
             if remain<=0:
                 break
 
@@ -128,5 +133,5 @@ if __name__ == '__main__':
 
         
         # save as file
-        with open(os.path.join(config.inference.save_path,'inference_%s_%s.pkl' % (config.model.type, config.model.size)), 'wb') as file:
+        with open(os.path.join(config.inference.save_path,'inference_d_%s_%s_%sto%s.pkl' % (config.model.type, config.model.size, args.start, args.end)), 'wb') as file:
             pickle.dump(test_data, file)

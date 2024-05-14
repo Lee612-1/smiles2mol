@@ -96,8 +96,8 @@ python -u script/gen.py --config_path ./config/qm9_default.yml --smiles c1ccccc1
 
 You can also generate conformations for an entire test set by three modes.
 ```bash
-python -u script/inference.py --config_path ./config/qm9_default.yml # normal
-python -u script/inference_d.py --config_path ./config/qm9_default.yml # provide some guidance when inference
+python -u script/inference_direct.py --config_path ./config/qm9_default.yml # direct inference
+python -u script/inference_guide.py --config_path ./config/qm9_default.yml # provide some guidance when inference
 python -u script/inference_threading.py --config_path ./config/qm9_default.yml # multi-gpu (max 4)
 ```
 
@@ -123,17 +123,30 @@ python -u script/get_result.py --input GEOM/generated/inference_*_*.pkl --thresh
 
 
 
-Table: COV and MAT scores on GEOM-QM9 small-scale
+Table 1: COV and MAT scores on GEOM-QM9 small-scale
 
 
-|    QM9-small     | COV-Mean (%) | COV-Median (%) | MAT-Mean (\AA) | MAT-Median (\AA) |
-| :--------: | :----------: | :------------: | :----------------------------------: | :------------------------------------: |
-| llama2-7b  |     |       |                           |                              |
-| llama2-13b |         |           |                               |                                  |
-|    mistral-7b   |         |          |                                |                                  |
-|  llama3-8b   |         |           |                                |                                  |
+| QM9-small | COV-Mean (%) | COV-Median (%) | MAT-Mean (\AA) | MAT-Median (\AA) |
+| :-------: | :----------: | :------------: | :------------: | :--------------: |
+| llama2-7b |/             |/               |/               |/                 |
+| llama2-13b|/             |/               |/               |/                 |
+| mistral-7b|39.1767       |35.2681         |0.5710          |0.5326            |
+| mistral-7b + forcefield-optimize|40.1235       |36.3724         |0.5561          |0.5314           |
+| llama3-8b | | | | |
+| llama3-8b + forcefield-optimize | | | | |
+| 
 
+Table 2: Precision-based COV and MAT scores on GEOM-QM9 small-scale
 
+|    QM9-small     | COV-P-Mean (%) | COV-P-Median (%) | MAT-P-Mean (\AA) | MAT-P-Median (\AA) |
+| :-------: | :----------: | :------------: | :------------: | :--------------: |
+| llama2-7b |/             |/               |/               |/                 |
+| llama2-13b|/             |/               |/               |/                 |
+| mistral-7b|16.7484      |10.0049         |0.8812          |0.8765            |
+| mistral-7b + forcefield-optimize|55.2869       |51.1319         |0.4479          |0.4436           |
+| llama3-8b | | | | |
+| llama3-8b + forcefield-optimize | | | | |
+|
 
 ## Visualizing molecules with PyMol
 

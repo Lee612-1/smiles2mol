@@ -5,7 +5,7 @@ import pickle
 import statistics
 import sys
 sys.path.append('/hpc2hdd/home/yli106/smiles2mol')
-from conf3d import utils, dataset
+from conf3d import utils
 from tqdm import tqdm
 from rdkit import RDLogger
 
@@ -16,12 +16,18 @@ if __name__ == '__main__':
     parser.add_argument('--threshold', type=float, default=0.5, help='threshold of COV score')
     args = parser.parse_args()
 
+    
+    # with open(args.input, 'rb') as f:
+    #     generated_data = pickle.load(f)
+
     generated_data = []
-    file_list = glob.glob(os.path.join(args.input, 'inference_mistral_7b_*.pkl'))
+    file_list = glob.glob(os.path.join(args.input, 'inference_llama3_8b_*.pkl'))
     for file in file_list:
         with open(file, 'rb') as f:
             generated_data_p = pickle.load(f)
         generated_data.extend(generated_data_p)
+    # utils.add_element(generated_data)
+    
     test_generated_data = []
     for i in range(len(generated_data)):
         try:

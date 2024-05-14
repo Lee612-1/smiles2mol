@@ -1,6 +1,11 @@
-Coverage Mean: 39.1767 | Coverage Median: 35.2681 | Match Mean: 0.5710 | Match Median: 0.5326
-Coverage-Precision Mean: 16.7484 | Coverage-Precision Median: 10.0049 | Match-Precision Mean: 0.8812 | Match-Precision Median: 0.8765
+mistral
 
-optimize
-Coverage Mean: 40.1235 | Coverage Median: 36.3724 | Match Mean: 0.5561 | Match Median: 0.5314
-Coverage-Precision Mean: 55.2869 | Coverage-Precision Median: 51.1319 | Match-Precision Mean: 0.4479 | Match-Precision Median: 0.4436
+    Coverage Mean: 39.1767 | Coverage Median: 35.2681 | Match Mean: 0.5710 | Match Median: 0.5326
+    Coverage-Precision Mean: 16.7484 | Coverage-Precision Median: 10.0049 | Match-Precision Mean: 0.8812 | Match-Precision Median: 0.8765
+
+    useFF
+    Coverage Mean: 40.1235 | Coverage Median: 36.3724 | Match Mean: 0.5561 | Match Median: 0.5314
+    Coverage-Precision Mean: 55.2869 | Coverage-Precision Median: 51.1319 | Match-Precision Mean: 0.4479 | Match-Precision Median: 0.4436
+
+
+llama3
