@@ -96,7 +96,8 @@ if __name__ == '__main__':
                 top_k=config.inference.top_k, 
                 top_p=config.inference.top_p, 
                 temperature=config.inference.temperature, 
-                eos_token_id=tokenizer.eos_token_id, 
+                eos_token_id=tokenizer.eos_token_id,       
+                pad_token_id=tokenizer.eos_token_id,
                 stopping_criteria=[CustomStoppingCriteria()], 
                 num_return_sequences=batch_size
             )
