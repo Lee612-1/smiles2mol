@@ -25,7 +25,7 @@ from rdkit import Chem
 from rdkit.Chem.rdmolops import RemoveHs
 from rdkit import RDLogger
 
-# python -u /hpc2hdd/home/yli106/smiles2mol/script/inference_direct.py --config_path /hpc2hdd/home/yli106/smiles2mol/config/qm9_default.yml --start 1 --end 50
+# python -u /hpc2hdd/home/yli106/smiles2mol/script/inference_direct.py --config_path /hpc2hdd/home/yli106/smiles2mol/config/qm9_default.yml --start 26 --end 50
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--config_path', type=str, help='path of config', required=True)
@@ -54,6 +54,16 @@ if __name__ == '__main__':
     model = PeftModel.from_pretrained(model, peft_path)
     model = model.merge_and_unload()
 
+    if config.model.type == 'llama2':
+        end_id = 11056
+        n_id = 13
+    elif config.model.type == 'mistral':
+        end_id = 21288
+        n_id = 13
+    elif config.model.type == 'llama3':
+        end_id = 11424
+        n_id = 198
+        
     # load the dataset
     load_path = os.path.join(config.data.base_path, '%s_processed' % config.data.dataset)
     print('loading data from %s' % load_path)
@@ -65,7 +75,10 @@ if __name__ == '__main__':
     for i in tqdm(range(len(test_data))):
         # encode input text
         num_conf = len(test_data[i][3])
-        input_text = dataset.process_inst(test_data[i][0], test_data[i][1], test_data[i][2])
+        if config.model.type == 'llama3':
+            input_text = dataset.process_inst_llama3(test_data[i][0], test_data[i][1], test_data[i][2])
+        else:
+            input_text = dataset.process_inst(test_data[i][0], test_data[i][1], test_data[i][2])
         input_ids = tokenizer.encode(input_text, return_tensors='pt')
         input_ids = input_ids.to('cuda')
         
@@ -73,10 +86,10 @@ if __name__ == '__main__':
         class CustomStoppingCriteria(StoppingCriteria):
             def __call__(self, input_ids, scores):
                 # check if the end signiture is generated
-                if 11056 in input_ids[0]:
+                if end_id in input_ids[0]:
                     return True 
                 # check if the number of line breaks reaches certain length
-                elif (input_ids[0] == 13).sum().item() >= test_data[0][1]+test_data[0][2]+10:
+                elif (input_ids[0] == n_id).sum().item() >= test_data[0][1]+test_data[0][2]+10:
                     return True
                 else:
                     return False
@@ -101,11 +114,18 @@ if __name__ == '__main__':
                 stopping_criteria=[CustomStoppingCriteria()], 
                 num_return_sequences=batch_size
             )
-            raw_generated_texts = [tokenizer.decode(sequence, skip_special_tokens=True) for sequence in output_sequences]
+            if  config.model.type == 'llama3':
+                raw_generated_texts = [tokenizer.decode(sequence, skip_special_tokens=False) for sequence in output_sequences]
+            else:
+                raw_generated_texts = [tokenizer.decode(sequence, skip_special_tokens=True) for sequence in output_sequences]
+            
             total_generate+=batch_size
             fail = 0
             for j in range(batch_size):
-                mol_block_text = dataset.get_mol_block(raw_generated_texts[j], test_data[i][0], test_data[i][1], test_data[i][2])
+                if config.model.type == 'llama3':
+                 mol_block_text = dataset.get_mol_block_llama3(raw_generated_texts[j], test_data[i][0], test_data[i][1], test_data[i][2])
+                else:
+                    mol_block_text = dataset.get_mol_block(raw_generated_texts[j], test_data[i][0], test_data[i][1], test_data[i][2])
                 
                 with open('test.mol', 'w') as f:
                     f.write(mol_block_text)
@@ -115,6 +135,8 @@ if __name__ == '__main__':
                     generated_mol.append(gen_mol)
                 except:
                     fail+=1
+            
+            # print(mol_block_text)
             empty_cache()  # Clear graphics memory cache
             if fail==batch_size:
                 all_fail.append(1)

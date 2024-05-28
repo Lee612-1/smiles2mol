@@ -3,7 +3,7 @@
 ----------------------------
 
 
-[[PDF]](https://github.com/Lee612-1/smiles2mol) | [[Slides]](https://github.com/Lee612-1/smiles2mol)
+[[PDF]](https://drive.google.com/file/d/1CiIofPARKtIjIXn_H1Y7aUkF_Bgg8WFy/view?usp=drive_link) | [[Slides]](https://drive.google.com/file/d/14nZ1Ejh7CiI8mcH_KpEvGK64et2KyA8Y/view?usp=drive_link)
  
 
 

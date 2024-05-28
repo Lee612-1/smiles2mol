@@ -26,7 +26,7 @@ from rdkit import Chem
 from rdkit.Chem.rdmolops import RemoveHs
 from rdkit import RDLogger
 
-# python -u /hpc2hdd/home/yli106/smiles2mol/script/inference_guide.py --config_path /hpc2hdd/home/yli106/smiles2mol/config/qm9_default.yml --start 151 --end 200
+# python -u /hpc2hdd/home/yli106/smiles2mol/script/inference_guide.py --config_path /hpc2hdd/home/yli106/smiles2mol/config/qm9_default.yml --start 186 --end 200
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--config_path', type=str, help='path of config', required=True)
@@ -155,7 +155,7 @@ if __name__ == '__main__':
                 break
 
             end_time = time.time()
-            if end_time - start_time >= 300*times:
+            if end_time - start_time >= 100*times:
                 pbar.close()
                 break
 
@@ -179,5 +179,5 @@ if __name__ == '__main__':
 
         
         # save as file
-        with open(os.path.join(config.inference.save_path,'inference_g_%s_%s_%sto%s.pkl' % (config.model.type, config.model.size, args.start, args.end)), 'wb') as file:
+        with open(os.path.join(config.inference.save_path,'inference_%s_%s_%sto%s.pkl' % (config.model.type, config.model.size, args.start, args.end)), 'wb') as file:
             pickle.dump(test_data, file)

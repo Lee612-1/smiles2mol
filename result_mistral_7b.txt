@@ -1,4 +1,16 @@
-mistral
+llama2 guide 1-10
+
+    Coverage Mean: 28.0139 | Coverage Median: 22.0805 | Match Mean: 0.5797 | Match Median: 0.5773
+    Coverage-Precision Mean: 11.1237 | Coverage-Precision Median: 6.4111 | Match-Precision Mean: 0.8317 | Match-Precision Median: 0.8150
+
+    useFF
+    Coverage Mean: 24.2216 | Coverage Median: 21.6412 | Match Mean: 0.5997 | Match Median: 0.6098
+    Coverage-Precision Mean: 44.9312 | Coverage-Precision Median: 48.5075 | Match-Precision Mean: 0.4583 | Match-Precision Median: 0.4465
+    
+    Valid: 85.9149
+
+
+mistral guide
 
     Coverage Mean: 39.1767 | Coverage Median: 35.2681 | Match Mean: 0.5710 | Match Median: 0.5326
     Coverage-Precision Mean: 16.7484 | Coverage-Precision Median: 10.0049 | Match-Precision Mean: 0.8812 | Match-Precision Median: 0.8765
@@ -7,5 +19,51 @@ mistral
     Coverage Mean: 40.1235 | Coverage Median: 36.3724 | Match Mean: 0.5561 | Match Median: 0.5314
     Coverage-Precision Mean: 55.2869 | Coverage-Precision Median: 51.1319 | Match-Precision Mean: 0.4479 | Match-Precision Median: 0.4436
 
+    Valid: 85.0569
+    Available: 100.0000
 
-llama3
+
+mistral direct 161
+
+    Coverage Mean: 61.6644 | Coverage Median: 66.8605 | Match Mean: 0.4682 | Match Median: 0.4237
+    Coverage-Precision Mean: 54.8414 | Coverage-Precision Median: 50.0000 | Match-Precision Mean: 0.4993 | Match-Precision Median: 0.4974
+
+    useFF
+    Coverage Mean: 37.2360 | Coverage Median: 30.9735 | Match Mean: 0.5554 | Match Median: 0.5281
+    Coverage-Precision Mean: 64.1703 | Coverage-Precision Median: 56.7568 | Match-Precision Mean: 0.3981 | Match-Precision Median: 0.3904
+
+    Valid: 40.3354
+    Available: 67.7019
+
+    compare
+    Coverage Mean: 40.9788 | Coverage Median: 36.8821 | Match Mean: 0.5884 | Match Median: 0.5319
+    Coverage-Precision Mean: 17.5538 | Coverage-Precision Median: 11.1111 | Match-Precision Mean: 0.8755 | Match-Precision Median: 0.8472
+    useFF
+    Coverage Mean: 40.8467 | Coverage Median: 37.5000 | Match Mean: 0.5797 | Match Median: 0.5313
+    Coverage-Precision Mean: 56.7605 | Coverage-Precision Median: 51.1278 | Match-Precision Mean: 0.4340 | Match-Precision Median: 0.4376
+
+
+llama3 guide
+
+    Coverage Mean: 38.7918 | Coverage Median: 37.8679 | Match Mean: 0.5766 | Match Median: 0.5362
+    Coverage-Precision Mean: 24.5188 | Coverage-Precision Median: 17.9674 | Match-Precision Mean: 0.8421 | Match-Precision Median: 0.8121
+
+    useFF
+    Coverage Mean: 39.3070 | Coverage Median: 35.3890 | Match Mean: 0.5518 | Match Median: 0.5363
+    Coverage-Precision Mean: 57.6653 | Coverage-Precision Median: 51.7924 | Match-Precision Mean: 0.4390 | Match-Precision Median: 0.4280
+
+    Valid: 89.9452
+    Available: 100.0000
+
+
+mix 
+
+    Coverage Mean: 55.5678 | Coverage Median: 56.1463 | Match Mean: 0.4686 | Match Median: 0.4640
+    Coverage-Precision Mean: 29.0075 | Coverage-Precision Median: 24.2074 | Match-Precision Mean: 0.7580 | Match-Precision Median: 0.7246
+
+    useFF
+    Coverage Mean: 42.5955 | Coverage Median: 39.2690 | Match Mean: 0.5092 | Match Median: 0.5162
+    Coverage-Precision Mean: 56.9600 | Coverage-Precision Median: 52.0906 | Match-Precision Mean: 0.4375 | Match-Precision Median: 0.4318
+    
+    Valid: 89.9015
+    Available: 100.0000
